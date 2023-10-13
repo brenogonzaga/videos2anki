@@ -1,31 +1,31 @@
 pub mod install {
     use std::process::Command;
+    use which::which;
 
-    pub fn windows() {
-        let ffmpeg_instal = Command::new("powershell")
-            .arg("winget")
-            .arg("install")
-            .arg("ffmpeg")
-            .status();
-        match ffmpeg_instal {
+    pub fn check() {
+        match which("ffmpeg") {
             Ok(_) => println!("ffmpeg is installed on this system"),
-            Err(_) => println!("ffmpeg is not installed on this system"),
-        }
-    }
+            Err(_) => {
+                let system = std::env::consts::OS;
+                let ffmpeg_install = match system {
+                    "windows" => Command::new("powershell")
+                        .arg("winget")
+                        .arg("install")
+                        .arg("ffmpeg")
+                        .status(),
+                    "linux" => Command::new("sudo")
+                        .arg("apt")
+                        .arg("install")
+                        .arg("ffmpeg")
+                        .status(),
+                    _ => panic!("Unsupported OS"),
+                };
 
-    pub fn linux() {
-        let ffmpeg_instal = Command::new("apt").arg("install").arg("ffmpeg").status();
-        match ffmpeg_instal {
-            Ok(_) => println!("ffmpeg is installed on this system"),
-            Err(_) => println!("ffmpeg is not installed on this system"),
-        }
-    }
-
-    pub fn macos() {
-        let ffmpeg_instal = Command::new("brew").arg("install").arg("ffmpeg").status();
-        match ffmpeg_instal {
-            Ok(_) => println!("ffmpeg is installed on this system"),
-            Err(_) => println!("ffmpeg is not installed on this system"),
+                match ffmpeg_install {
+                    Ok(_) => println!("ffmpeg is installed on this system"),
+                    Err(_) => println!("ffmpeg is not installed on this system"),
+                }
+            }
         }
     }
 }
