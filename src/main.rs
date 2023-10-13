@@ -1,4 +1,9 @@
-use std::{fs::File, io::BufReader, time::Instant};
+use std::{
+    fs::File,
+    io::{self, BufReader},
+    path::Path,
+    time::Instant,
+};
 
 mod ffmpeg;
 mod file;
@@ -12,14 +17,14 @@ fn main() {
 pub fn run() {
     let file = File::open("./test/example.srt").unwrap();
     let reader = BufReader::new(file);
+    let output_path = format!("./output/media/");
+    let video_name = "The_Kardashians_S1E1".to_string();
+    let input_path = input_file();
 
     let _ = std::fs::remove_dir_all("./output");
     let _ = std::fs::create_dir_all("./output/media/");
 
     let (sentences, times, count) = srt::extract::sentences_and_times(reader);
-
-    let video_name = "The_Kardashians_S1E1".to_string();
-
     file::csv::write(video_name.clone(), times.clone(), sentences);
 
     let start = Instant::now();
@@ -31,29 +36,54 @@ pub fn run() {
             start_time.replace(":", "."),
             end_time.replace(":", ".")
         );
-        let video_output_path = format!("./output/media/{}.mp4", output_name);
-        let audio_output_path = format!("./output/media/{}.mp3", output_name);
 
         ffmpeg::cut::video(
             start_time.to_string(),
             end_time.to_string(),
-            "./test/input.mkv".to_string(),
-            video_output_path.clone(),
+            input_path.clone(),
+            output_path.clone() + &output_name,
         );
 
         ffmpeg::cut::audio(
             start_time.to_string(),
             end_time.to_string(),
-            "./test/input.mkv".to_string(),
-            audio_output_path.clone(),
+            input_path.clone(),
+            output_path.clone() + &output_name,
         );
 
-        println!("({} of {}) done", i + 1, count,);
-        let end = Instant::now();
-        let duration = end.duration_since(start);
-        let seconds = duration.as_secs();
-        let minutes = seconds / 60;
-        let seconds = seconds % 60;
-        println!("Time elapsed: {}m {}s", minutes, seconds);
+        calculate_time_and_remaining(start, i + 1, count);
     }
+}
+
+fn calculate_time_and_remaining(start: Instant, done: usize, missing: usize) {
+    let elapsed = start.elapsed();
+    let secs = elapsed.as_secs();
+    let mins = secs / 60;
+    let secs = secs % 60;
+
+    println!("{} of {} done. ", done + 1, missing,);
+    println!("Time elapsed: {}m {}s.", mins, secs);
+
+    if done > 0 {
+        let secs = ((secs as f64 / done as f64) * (missing - done) as f64).round() as u64;
+        let mins = secs / 60;
+        let secs = secs % 60;
+        println!("Estimated time remaining: {}m {}s.", mins, secs);
+    }
+}
+
+fn input_file() -> String {
+    let mut input_path = String::new();
+    loop {
+        println!("Enter input file path:");
+        io::stdin().read_line(&mut input_path).unwrap();
+        input_path = input_path.trim().to_string();
+
+        if Path::new(&input_path).exists() {
+            break;
+        } else {
+            println!("File not found. Please try again.");
+        }
+    }
+    input_path
 }

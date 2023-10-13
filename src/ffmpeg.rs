@@ -18,12 +18,12 @@ pub mod install {
                         .arg("install")
                         .arg("ffmpeg")
                         .status(),
-                    _ => panic!("Unsupported OS"),
+                    _ => panic!("Unsupported OS."),
                 };
 
                 match ffmpeg_install {
-                    Ok(_) => println!("ffmpeg is installed on this system"),
-                    Err(_) => println!("ffmpeg is not installed on this system"),
+                    Ok(_) => println!("ffmpeg is installed on this system."),
+                    Err(_) => println!("ffmpeg is not installed on this system."),
                 }
             }
         }
@@ -31,56 +31,52 @@ pub mod install {
 }
 
 pub mod cut {
-    use std::process::Command;
+    use std::process::{Command, Stdio};
 
     pub fn video(start_time: String, end_time: String, input_file: String, output_file: String) {
-        let ffmpeg_video = Command::new("ffmpeg")
-            .arg("-i")
-            .arg(input_file)
-            .arg("-ss")
-            .arg(start_time)
-            .arg("-to")
-            .arg(end_time)
-            .arg("-c:v")
-            .arg("libx264")
-            .arg("-s")
-            .arg("1280x720")
-            .arg(output_file)
-            .arg("-preset")
-            .arg("veryfast")
-            .arg("-b:v")
-            .arg("500k")
-            .arg("-r")
-            .arg("30")
-            .output()
-            .expect("failed to execute process");
-        if !ffmpeg_video.status.success() {
-            let error_message = String::from_utf8_lossy(&ffmpeg_video.stderr);
-            println!("Error message: {}", error_message);
-            return;
+        let duration = tsv_time_to_seconds(&end_time) - tsv_time_to_seconds(&start_time);
+        let commands = format!(
+            "-ss {} -t {} -i {} {}.mp4 -c:v libx264 -strict -2 -loglevel quiet -map 0:v:0 -map 0:a:0 -c:a aac -ac 2 -vf \"scale=1280:720\" -crf 18 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+            start_time, duration, input_file, output_file
+        );
+        let mut ffmpeg_video = Command::new("ffmpeg")
+            .args(commands.split(" "))
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        match ffmpeg_video.wait() {
+            Ok(_) => print!(""),
+            Err(_) => println!("Video cut unsuccessfully"),
         }
     }
 
     pub fn audio(start_time: String, end_time: String, input_file: String, output_file: String) {
-        let ffmpeg_audio = Command::new("ffmpeg")
-            .arg("-i")
-            .arg(input_file)
-            .arg("-ss")
-            .arg(start_time)
-            .arg("-to")
-            .arg(end_time)
-            .arg("-acodec")
-            .arg("libmp3lame")
-            .arg(output_file)
-            .arg("-preset")
-            .arg("ultrafast")
-            .output()
-            .expect("failed to execute process");
+        let duration = tsv_time_to_seconds(&end_time) - tsv_time_to_seconds(&start_time);
+        let commands = format!(
+            "-ss {} -t {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+            start_time, duration, input_file, output_file
+        );
+        let mut ffmpeg_audio = Command::new("ffmpeg")
+            .args(commands.split(" "))
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
 
-        if !ffmpeg_audio.status.success() {
-            let error_message = String::from_utf8_lossy(&ffmpeg_audio.stderr);
-            println!("Error message: {}", error_message);
-            return;
+        match ffmpeg_audio.wait() {
+            Ok(_) => print!(""),
+            Err(_) => println!("Audio cut unsuccessfully"),
         }
+    }
+
+    fn tsv_time_to_seconds(time_str: &str) -> f32 {
+        let time = time_str.replace(".", ":");
+        let time = time.split(":").collect::<Vec<&str>>();
+        let hours = time[0].parse::<f32>().unwrap();
+        let minutes = time[1].parse::<f32>().unwrap();
+        let seconds = time[2].parse::<f32>().unwrap();
+        let milliseconds = time[3].parse::<f32>().unwrap();
+        let total_seconds = hours * 3600.0 + minutes * 60.0 + seconds + milliseconds / 1000.0;
+        total_seconds
     }
 }

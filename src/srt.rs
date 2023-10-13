@@ -18,6 +18,11 @@ pub mod extract {
 
         for line in reader.lines() {
             let line = line.unwrap();
+
+            if line.is_empty() {
+                continue;
+            }
+
             if re_times.is_match(&line) {
                 let caps = re_times.captures(&line).unwrap();
                 let start_time = caps[1].replace(",", ".");
