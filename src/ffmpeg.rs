@@ -43,7 +43,15 @@ pub mod cut {
             .arg(end_time)
             .arg("-c:v")
             .arg("libx264")
+            .arg("-s")
+            .arg("1280x720")
             .arg(output_file)
+            .arg("-preset")
+            .arg("veryfast")
+            .arg("-b:v")
+            .arg("500k")
+            .arg("-r")
+            .arg("30")
             .output()
             .expect("failed to execute process");
         if !ffmpeg_video.status.success() {
@@ -64,6 +72,8 @@ pub mod cut {
             .arg("-acodec")
             .arg("libmp3lame")
             .arg(output_file)
+            .arg("-preset")
+            .arg("ultrafast")
             .output()
             .expect("failed to execute process");
 
