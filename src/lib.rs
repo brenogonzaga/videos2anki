@@ -17,8 +17,8 @@ fn run(input_video: String) -> PyResult<()> {
     ffmpeg::install::check();
     let file = File::open("./test/example.srt").unwrap();
     let reader = BufReader::new(file);
-    let output_path = format!("./output/media/");
-    let video_name = "The_Kardashians_S1E1".to_string();
+    let output_path = String::from("./output/media/");
+    let video_name = String::from("The_Kardashians_S1E1");
 
     let _ = std::fs::remove_dir_all("./output");
     let _ = std::fs::create_dir_all("./output/media/");

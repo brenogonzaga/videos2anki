@@ -21,8 +21,8 @@ pub fn sentences_and_times(reader: BufReader<File>) -> (Vec<String>, Vec<(String
 
         if re_times.is_match(&line) {
             let caps = re_times.captures(&line).unwrap();
-            let start_time = caps[1].replace(",", ".");
-            let end_time = caps[2].replace(",", ".");
+            let start_time = caps[1].replace(',', ".");
+            let end_time = caps[2].replace(',', ".");
             vec_times.push((start_time, end_time));
             vec_sentences.push(sentence.trim().to_string());
             sentence.clear();

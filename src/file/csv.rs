@@ -10,8 +10,8 @@ pub fn write(file_name: String, times: Vec<(String, String)>, sentences: Vec<Str
         .unwrap();
 
     for (i, (start_time, end_time)) in times.iter().enumerate() {
-        let start_time = start_time.replace(":", ".");
-        let end_time = end_time.replace(":", ".");
+        let start_time = start_time.replace(':', ".");
+        let end_time = end_time.replace(':', ".");
         let video = format!("[sound:{}_{}-{}.mp4]", file_name, start_time, end_time);
         let audio = format!("[sound:{}_{}-{}.mp3]", file_name, start_time, end_time);
         let line = format!("{}\t{}\t{}\t", file_name, video, audio);

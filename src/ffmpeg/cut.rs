@@ -7,7 +7,7 @@ pub fn video(start_time: String, end_time: String, input_file: String, output_fi
             start_time, duration, input_file, output_file
         );
     let mut ffmpeg_video = Command::new("ffmpeg")
-        .args(commands.split(" "))
+        .args(commands.split(' '))
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
@@ -25,7 +25,7 @@ pub fn audio(start_time: String, end_time: String, input_file: String, output_fi
             start_time, duration, input_file, output_file
         );
     let mut ffmpeg_audio = Command::new("ffmpeg")
-        .args(commands.split(" "))
+        .args(commands.split(' '))
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
@@ -37,8 +37,8 @@ pub fn audio(start_time: String, end_time: String, input_file: String, output_fi
 }
 
 fn tsv_time_to_seconds(time_str: &str) -> f32 {
-    let time = time_str.replace(".", ":");
-    let time = time.split(":").collect::<Vec<&str>>();
+    let time = time_str.replace('.', ":");
+    let time = time.split(':').collect::<Vec<&str>>();
     let hours = time[0].parse::<f32>().unwrap();
     let minutes = time[1].parse::<f32>().unwrap();
     let seconds = time[2].parse::<f32>().unwrap();
