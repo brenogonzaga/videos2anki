@@ -36,8 +36,8 @@ fn run(input_video: String) -> PyResult<()> {
         let output_name = format!(
             "{}_{}-{}",
             video_name,
-            start_time.replace(":", "."),
-            end_time.replace(":", ".")
+            start_time.replace(':', "."),
+            end_time.replace(':', ".")
         );
 
         ffmpeg::cut::video(

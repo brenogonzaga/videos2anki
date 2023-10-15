@@ -43,6 +43,5 @@ fn tsv_time_to_seconds(time_str: &str) -> f32 {
     let minutes = time[1].parse::<f32>().unwrap();
     let seconds = time[2].parse::<f32>().unwrap();
     let milliseconds = time[3].parse::<f32>().unwrap();
-    let total_seconds = hours * 3600.0 + minutes * 60.0 + seconds + milliseconds / 1000.0;
-    total_seconds
+    hours * 3600.0 + minutes * 60.0 + seconds + milliseconds / 1000.0
 }
