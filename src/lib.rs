@@ -1,10 +1,9 @@
+mod ffmpeg;
+mod file;
+
 use indicatif::{ProgressBar, ProgressStyle};
 use pyo3::prelude::*;
 use std::{fs::File, io::BufReader};
-
-mod ffmpeg;
-mod file;
-mod srt;
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -24,7 +23,7 @@ fn run(input_video: String) -> PyResult<()> {
     let _ = std::fs::remove_dir_all("./output");
     let _ = std::fs::create_dir_all("./output/media/");
 
-    let (sentences, times, count) = srt::extract::sentences_and_times(reader);
+    let (sentences, times, count) = file::srt::sentences_and_times(reader);
     file::csv::write(video_name.clone(), times.clone(), sentences);
 
     let pb = ProgressBar::new(count as u64);
