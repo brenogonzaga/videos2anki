@@ -372,16 +372,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sync_scribe"
-version = "0.1.0"
-dependencies = [
- "indicatif",
- "pyo3",
- "regex",
- "which",
-]
-
-[[package]]
 name = "target-lexicon"
 version = "0.12.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -404,6 +394,16 @@ name = "unindent"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e1766d682d402817b5ac4490b3c3002d91dfa0d22812f341609f97b08757359c"
+
+[[package]]
+name = "videos2anki"
+version = "0.1.0"
+dependencies = [
+ "indicatif",
+ "pyo3",
+ "regex",
+ "which",
+]
 
 [[package]]
 name = "which"

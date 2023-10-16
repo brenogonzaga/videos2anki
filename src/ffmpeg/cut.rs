@@ -1,47 +1,101 @@
-use std::process::{Command, Stdio};
+use crate::ffmpeg::run::run_ffmpeg_command;
+use indicatif::{ProgressBar, ProgressStyle};
+use std::io::Error;
 
-pub fn video(start_time: String, end_time: String, input_file: String, output_file: String) {
-    let duration = tsv_time_to_seconds(&end_time) - tsv_time_to_seconds(&start_time);
-    let commands = format!(
-            "-ss {} -t {} -i {} {}.mp4 -c:v libx264 -strict -2 -loglevel quiet -map 0:v:0 -map 0:a:0 -c:a aac -ac 2 -vf \"scale=1280:720\" -crf 18 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
-            start_time, duration, input_file, output_file
+pub struct Audio {
+    times: Vec<(String, String)>,
+    input_file: String,
+    output_path: String,
+    output_name: String,
+}
+pub struct Video {
+    times: Vec<(String, String)>,
+    input_file: String,
+    output_path: String,
+    output_name: String,
+}
+
+impl Audio {
+    pub fn new(
+        times: Vec<(String, String)>,
+        input_file: String,
+        output_path: String,
+        output_file: String,
+    ) -> Self {
+        Self {
+            times,
+            input_file,
+            output_path,
+            output_name: output_file,
+        }
+    }
+
+    pub fn run(&self) -> Result<(), Error> {
+        let pb = ProgressBar::new(self.times.len() as u64);
+        pb.set_style(
+            ProgressStyle::default_bar()
+                .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({percent}%)")
+                .unwrap()
+                .progress_chars("#>-"),
         );
-    let mut ffmpeg_video = Command::new("ffmpeg")
-        .args(commands.split(' '))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
+        for (i, (start, end)) in self.times.iter().enumerate() {
+            let file_name = format!(
+                "{}/media/{}{}-{}",
+                self.output_path, self.output_name, start, end
+            );
+            let file_name = file_name.replace(':', ".").replace(' ', "_");
+            let commands = format!(
+                "-ss {} -to {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+                start, end, self.input_file, file_name
+            );
+            pb.set_position((i + 1) as u64);
 
-    match ffmpeg_video.wait() {
-        Ok(_) => print!(""),
-        Err(_) => println!("Video cut unsuccessfully"),
+            let _ = run_ffmpeg_command(commands);
+        }
+        pb.finish_with_message("Finished processing audio");
+        Ok(())
     }
 }
 
-pub fn audio(start_time: String, end_time: String, input_file: String, output_file: String) {
-    let duration = tsv_time_to_seconds(&end_time) - tsv_time_to_seconds(&start_time);
-    let commands = format!(
-            "-ss {} -t {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
-            start_time, duration, input_file, output_file
-        );
-    let mut ffmpeg_audio = Command::new("ffmpeg")
-        .args(commands.split(' '))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-
-    match ffmpeg_audio.wait() {
-        Ok(_) => print!(""),
-        Err(_) => println!("Audio cut unsuccessfully"),
+impl Video {
+    pub fn new(
+        times: Vec<(String, String)>,
+        input_file: String,
+        output_path: String,
+        output_name: String,
+    ) -> Self {
+        Self {
+            times,
+            input_file,
+            output_path,
+            output_name,
+        }
     }
-}
 
-fn tsv_time_to_seconds(time_str: &str) -> f32 {
-    let time = time_str.replace('.', ":");
-    let time = time.split(':').collect::<Vec<&str>>();
-    let hours = time[0].parse::<f32>().unwrap();
-    let minutes = time[1].parse::<f32>().unwrap();
-    let seconds = time[2].parse::<f32>().unwrap();
-    let milliseconds = time[3].parse::<f32>().unwrap();
-    hours * 3600.0 + minutes * 60.0 + seconds + milliseconds / 1000.0
+    pub fn run(&self) -> Result<(), Error> {
+        let pb = ProgressBar::new(self.times.len() as u64);
+        pb.set_style(
+            ProgressStyle::default_bar()
+                .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({percent}%)")
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+
+        for (i, (start, end)) in self.times.iter().enumerate() {
+            let file_name = format!(
+                "{}/media/{}{}-{}",
+                self.output_path, self.output_name, start, end
+            );
+            let file_name = file_name.replace(':', ".").replace(' ', "_");
+            let commands = format!(
+                "-ss {} -to {} -i {} {}.mp4 -c:v libx264 -strict -2 -loglevel quiet -map 0:v:0 -map 0:a:0 -c:a aac -ac 2 -vf \"scale=1280:720\" -crf 18 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+                start, end, self.input_file, file_name
+            );
+            let _ = run_ffmpeg_command(commands);
+
+            pb.set_position((i + 1) as u64);
+        }
+        pb.finish_with_message("Finished processing videos");
+        Ok(())
+    }
 }

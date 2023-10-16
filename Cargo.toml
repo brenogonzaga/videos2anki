@@ -1,11 +1,11 @@
 [package]
-name = "sync_scribe"
+name = "videos2anki"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "sync_scribe"
+name = "videos2anki"
 crate-type = ["cdylib"]
 
 [dependencies]
