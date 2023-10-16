@@ -8,7 +8,9 @@ dev:
 	maturin develop & python init.py
 run:
 	cargo run 
+dev:
+	maturin develop & python init.py
 build:
-	cargo build --release
+	cargo clean & cargo build --release & del /Q *.pyd & copy target\release\*.dll .\ & rename *.dll *.pyd & pyinstaller --noconfirm  init.py
 clean:
 	cargo clean
