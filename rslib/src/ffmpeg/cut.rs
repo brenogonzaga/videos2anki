@@ -1,5 +1,4 @@
 use crate::ffmpeg::run::run_ffmpeg_command;
-use indicatif::{ProgressBar, ProgressStyle};
 use std::io::Error;
 
 pub struct Audio {
@@ -30,14 +29,8 @@ impl Audio {
         }
     }
 
-    pub fn run(&self) -> Result<(), Error> {
-        let pb = ProgressBar::new(self.times.len() as u64);
-        pb.set_style(
-            ProgressStyle::default_bar()
-                .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({percent}%)")
-                .unwrap()
-                .progress_chars("#>-"),
-        );
+    pub fn run(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+        let _ = std::fs::create_dir_all(self.output_path.clone() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
             let file_name = format!(
                 "{}/media/{}{}-{}",
@@ -48,11 +41,11 @@ impl Audio {
                 "-ss {} -to {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
                 start, end, self.input_file, file_name
             );
-            pb.set_position((i + 1) as u64);
 
             let _ = run_ffmpeg_command(commands);
+
+            progress(i.try_into().unwrap(), self.times.len() as u64);
         }
-        pb.finish_with_message("Finished processing audio");
         Ok(())
     }
 }
@@ -72,15 +65,8 @@ impl Video {
         }
     }
 
-    pub fn run(&self) -> Result<(), Error> {
-        let pb = ProgressBar::new(self.times.len() as u64);
-        pb.set_style(
-            ProgressStyle::default_bar()
-                .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({percent}%)")
-                .unwrap()
-                .progress_chars("#>-"),
-        );
-
+    pub fn run(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+        let _ = std::fs::create_dir_all(self.output_path.clone() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
             let file_name = format!(
                 "{}/media/{}{}-{}",
@@ -93,9 +79,8 @@ impl Video {
             );
             let _ = run_ffmpeg_command(commands);
 
-            pb.set_position((i + 1) as u64);
+            progress(i.try_into().unwrap(), self.times.len() as u64);
         }
-        pb.finish_with_message("Finished processing videos");
         Ok(())
     }
 }

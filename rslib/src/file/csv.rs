@@ -7,6 +7,7 @@ pub fn write(
     sentences: &[String],
     output_path: &String,
 ) {
+    let _ = std::fs::create_dir_all(format!("{}/csv", output_path));
     let mut file = OpenOptions::new()
         .write(true)
         .append(true)
