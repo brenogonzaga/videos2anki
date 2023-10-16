@@ -38,7 +38,7 @@ impl Audio {
             );
             let file_name = file_name.replace(':', ".").replace(' ', "_");
             let commands = format!(
-                "-ss {} -to {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+                "-y -ss {} -to {} -i {} {}.mp3 -vn -acodec libmp3lame -strict -2 -loglevel quiet -map 0:a:0 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
                 start, end, self.input_file, file_name
             );
 
@@ -74,7 +74,7 @@ impl Video {
             );
             let file_name = file_name.replace(':', ".").replace(' ', "_");
             let commands = format!(
-                "-ss {} -to {} -i {} {}.mp4 -c:v libx264 -strict -2 -loglevel quiet -map 0:v:0 -map 0:a:0 -c:a aac -ac 2 -vf \"scale=1280:720\" -crf 18 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
+                "-y -ss {} -to {} -i {} {}.mp4 -c:v libx264 -strict -2 -loglevel quiet -map 0:v:0 -map 0:a:0 -c:a aac -ac 2 -vf \"scale=1280:720\" -crf 18 -af \"volume=1.5\" -af \"afade=t=out:st=4:d=1\"",
                 start, end, self.input_file, file_name
             );
             let _ = run_ffmpeg_command(commands);
