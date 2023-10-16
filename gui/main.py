@@ -1,5 +1,5 @@
 from PySide6 import  QtWidgets
-import videos2anki
+import bridge
 
 class Video2Anki(QtWidgets.QWidget):
     def __init__(self):
@@ -34,5 +34,5 @@ class Video2Anki(QtWidgets.QWidget):
         video_path = self.path_edit.text()
         if video_path:
             # You can replace this line with the actual function call
-            videos2anki.run(video_path)
+            bridge.run(video_path)
             # Add any additional logic or display a message as needed
