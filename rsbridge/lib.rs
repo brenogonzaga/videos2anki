@@ -59,13 +59,13 @@ fn generate_video(
 #[pyfunction]
 fn generate_csv(input_srt: String, output_path: String, title: String) -> PyResult<()> {
     let (sentences, times) = generate_times(input_srt);
-    ffmpeg::csv::write(&title, &times, &sentences, &output_path);
+    file::csv::write(&title, &times, &sentences, &output_path);
     Ok(())
 }
 
 fn generate_times(input_srt: String) -> (Vec<String>, Vec<(String, String)>) {
     let srt_path = File::open(input_srt).unwrap();
     let reader = BufReader::new(srt_path);
-    let (sentences, times) = ffmpeg::srt::sentences_and_times(reader);
+    let (sentences, times) = file::srt::sentences_and_times(reader);
     (sentences, times)
 }

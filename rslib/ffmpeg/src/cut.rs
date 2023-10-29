@@ -1,4 +1,4 @@
-use crate::ffmpeg::run::run_ffmpeg_command;
+use crate::run::run_ffmpeg_command;
 use std::io::Error;
 
 pub struct Audio {
@@ -44,7 +44,10 @@ impl Audio {
 
             let _ = run_ffmpeg_command(commands);
 
-            progress(i.try_into().unwrap(), self.times.len() as u64);
+            progress(
+                (i + 1).try_into().unwrap(),
+                (self.times.len() - i - 1) as u64,
+            );
         }
         Ok(())
     }
@@ -79,7 +82,10 @@ impl Video {
             );
             let _ = run_ffmpeg_command(commands);
 
-            progress(i.try_into().unwrap(), self.times.len() as u64);
+            progress(
+                (i + 1).try_into().unwrap(),
+                (self.times.len() - i - 1) as u64,
+            );
         }
         Ok(())
     }
