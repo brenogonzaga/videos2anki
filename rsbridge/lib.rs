@@ -1,6 +1,7 @@
-use std::{fs::File, io::BufReader};
+mod generate;
 
 use ffmpeg::cut::{Audio, Video};
+use generate::times;
 use pyo3::{prelude::*, IntoPy};
 
 #[pymodule]
@@ -31,13 +32,14 @@ impl ProcessAudio {
         }
     }
 
-    fn run(&self, progress: PyObject) -> PyResult<()> {
-        let (_, times) = generate_times(self.input_srt.clone());
+    fn start(&self, progress: PyObject) -> PyResult<()> {
+        let (_, times) = times(self.input_srt.clone());
         let callback: Box<dyn Fn(u64, u64)> = Box::new(move |done, missing| {
             Python::with_gil(|py| {
+                let type_obj = "Audio";
                 let done_obj = done.into_py(py);
                 let missing_obj = missing.into_py(py);
-                let _result = progress.call(py, (done_obj, missing_obj), None);
+                let _result = progress.call(py, (done_obj, missing_obj, type_obj), None);
             });
         });
         Audio::new(
@@ -46,7 +48,7 @@ impl ProcessAudio {
             self.output_path.clone(),
             self.title.clone(),
         )
-        .run(&callback)?;
+        .start(&callback)?;
         Ok(())
     }
 }
@@ -71,13 +73,14 @@ impl ProcessVideo {
         }
     }
 
-    fn run(&self, progress: PyObject) -> PyResult<()> {
-        let (_, times) = generate_times(self.input_srt.clone());
+    fn start(&self, progress: PyObject) -> PyResult<()> {
+        let (_, times) = times(self.input_srt.clone());
         let callback: Box<dyn Fn(u64, u64)> = Box::new(move |done, missing| {
             Python::with_gil(|py| {
+                let type_obj = "Video";
                 let done_obj = done.into_py(py);
                 let missing_obj = missing.into_py(py);
-                let _result = progress.call(py, (done_obj, missing_obj), None);
+                let _result = progress.call(py, (done_obj, missing_obj, type_obj), None);
             });
         });
         Video::new(
@@ -86,7 +89,7 @@ impl ProcessVideo {
             self.output_path.clone(),
             self.title.clone(),
         )
-        .run(&callback)?;
+        .start(&callback)?;
         Ok(())
     }
 }
@@ -109,16 +112,9 @@ impl ProcessCsv {
         }
     }
 
-    fn run(&self) -> PyResult<()> {
-        let (sentences, times) = generate_times(self.input_srt.clone());
+    fn start(&self) -> PyResult<()> {
+        let (sentences, times) = times(self.input_srt.clone());
         file::csv::write(&self.title, &times, &sentences, &self.output_path);
         Ok(())
     }
-}
-
-fn generate_times(input_srt: String) -> (Vec<String>, Vec<(String, String)>) {
-    let srt_path = File::open(input_srt).unwrap();
-    let reader = BufReader::new(srt_path);
-    let (sentences, times) = file::srt::sentences_and_times(reader);
-    (sentences, times)
 }

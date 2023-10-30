@@ -19,19 +19,21 @@ impl Audio {
         times: Vec<(String, String)>,
         input_file: String,
         output_path: String,
-        output_file: String,
+        output_name: String,
     ) -> Self {
         Self {
             times,
             input_file,
             output_path,
-            output_name: output_file,
+            output_name,
         }
     }
 
-    pub fn run(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+    pub fn start(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
         let _ = std::fs::create_dir_all(self.output_path.clone() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
+            // wait 1 seconds before next cut
+            std::thread::sleep(std::time::Duration::from_secs(1));
             let file_name = format!(
                 "{}/media/{}{}-{}",
                 self.output_path, self.output_name, start, end
@@ -68,9 +70,11 @@ impl Video {
         }
     }
 
-    pub fn run(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+    pub fn start(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
         let _ = std::fs::create_dir_all(self.output_path.clone() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
+            // wait 1 seconds before next cut
+            std::thread::sleep(std::time::Duration::from_secs(1));
             let file_name = format!(
                 "{}/media/{}{}-{}",
                 self.output_path, self.output_name, start, end
