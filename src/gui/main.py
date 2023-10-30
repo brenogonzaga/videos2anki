@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-import bridge
+from bridge import ProcessVideo, ProcessAudio, ProcessCsv
 
 class Video2Anki(QtWidgets.QWidget):
     def __init__(self):
@@ -11,6 +11,10 @@ class Video2Anki(QtWidgets.QWidget):
         self.path_label = QtWidgets.QLabel("Video Path:")
         self.path_edit = QtWidgets.QLineEdit()
         self.browse_button = QtWidgets.QPushButton("Browse")
+        self.output_name_label = QtWidgets.QLabel("Output Name:")
+        self.output_name_edit = QtWidgets.QLineEdit()
+        self.output_path_label = QtWidgets.QLabel("Output Path:")
+        self.output_path_edit = QtWidgets.QLineEdit()
         self.run_button = QtWidgets.QPushButton("Run")
         self.progress_label = QtWidgets.QLabel()
 
@@ -21,9 +25,16 @@ class Video2Anki(QtWidgets.QWidget):
         form_layout = QtWidgets.QFormLayout()
         form_layout.addRow(self.path_label, self.path_edit)
         form_layout.addRow(self.browse_button)
+        form_layout.addRow(self.output_name_label, self.output_name_edit)
+        form_layout.addRow(self.output_path_label, self.output_path_edit)
         layout.addLayout(form_layout)
         layout.addWidget(self.run_button)
         layout.addWidget(self.progress_label)
+
+    
+
+    def output_name(self):
+        return self.output_name_edit.text()
 
     def browse_path(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Choose Video File", "", "Video Files (*.mp4 *.avi *.mkv)")
@@ -35,8 +46,13 @@ class Video2Anki(QtWidgets.QWidget):
 
     def run_video_to_anki(self):
         video_path = self.path_edit.text()
+        output_name = self.output_name_edit.text()
+        output_path = self.output_path_edit.text()
         if video_path:
             srt_path = video_path.replace(".mkv", ".srt")
-            bridge.generate_audio(video_path, srt_path, "output", "video", self.update_progress)
-            bridge.generate_video(video_path, srt_path, "output", "video", self.update_progress)
-            bridge.generate_csv(srt_path, "output", "video")
+            process_audio = ProcessAudio(video_path, srt_path, output_path, output_name)
+            process_video = ProcessVideo(video_path, srt_path, output_path, output_name)
+            process_csv = ProcessCsv(srt_path, output_path, output_name)
+            process_csv.run()
+            process_audio.run(self.update_progress)
+            process_video.run(self.update_progress)
