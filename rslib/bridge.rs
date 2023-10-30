@@ -1,9 +1,10 @@
-mod generate;
-
 use ffmpeg::cut::{Audio, Video};
-use file::csv::WriteCsv;
-use generate::times;
+use file::{csv::WriteCsv, srt};
 use pyo3::{prelude::*, IntoPy};
+use std::{
+    fs::File,
+    io::{BufReader, Error},
+};
 
 #[pymodule]
 fn bridge(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -34,7 +35,9 @@ impl ProcessAudio {
     }
 
     fn start(&self, progress: PyObject) -> PyResult<()> {
-        let (_, times) = times(self.input_srt.clone());
+        let (_, times) = times(self.input_srt.clone()).expect(
+            "Error while parsing the srt file. Please make sure it is in the correct format.",
+        );
         let callback: Box<dyn Fn(u64, u64)> = Box::new(move |done, missing| {
             Python::with_gil(|py| {
                 let type_obj = "Audio";
@@ -75,7 +78,9 @@ impl ProcessVideo {
     }
 
     fn start(&self, progress: PyObject) -> PyResult<()> {
-        let (_, times) = times(self.input_srt.clone());
+        let (_, times) = times(self.input_srt.clone()).expect(
+            "Error while parsing the srt file. Please make sure it is in the correct format.",
+        );
         let callback: Box<dyn Fn(u64, u64)> = Box::new(move |done, missing| {
             Python::with_gil(|py| {
                 let type_obj = "Video";
@@ -114,7 +119,9 @@ impl ProcessCsv {
     }
 
     fn start(&self) -> PyResult<()> {
-        let (sentences, times) = times(self.input_srt.clone());
+        let (sentences, times) = times(self.input_srt.clone()).expect(
+            "Error while parsing the srt file. Please make sure it is in the correct format.",
+        );
         WriteCsv::new(
             self.title.clone(),
             times,
@@ -124,4 +131,13 @@ impl ProcessCsv {
         .write();
         Ok(())
     }
+}
+
+type Times = Vec<(String, String)>;
+type Sentences = Vec<String>;
+
+pub fn times(input_srt: String) -> Result<(Sentences, Times), Error> {
+    let reader = BufReader::new(File::open(input_srt)?);
+    let (sentences, times) = srt::sentences_and_times(reader);
+    Ok((sentences, times))
 }

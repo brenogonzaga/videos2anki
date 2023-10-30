@@ -25,7 +25,7 @@ impl<T: Into<String> + Clone> WriteCsv<T> {
             .append(true)
             .create(true)
             .open(format!(
-                "{}/csv/{}.csv",
+                "{}/{}.csv",
                 self.output_path.clone().into(),
                 self.file_name.clone().into()
             ))

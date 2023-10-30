@@ -25,10 +25,9 @@ impl<T: Into<String> + Clone> Audio<T> {
     }
 
     pub fn start(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
-        let _ = std::fs::create_dir_all(self.output_path.clone().into() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
             let file_name = format!(
-                "{}/media/{}{}-{}",
+                "{}/{}{}-{}",
                 self.output_path.clone().into(),
                 self.output_name.clone().into(),
                 start.clone().into(),
@@ -68,10 +67,9 @@ impl<T: Into<String> + Clone> Video<T> {
     }
 
     pub fn start(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
-        let _ = std::fs::create_dir_all(self.output_path.clone().into() + "/media/");
         for (i, (start, end)) in self.times.iter().enumerate() {
             let file_name = format!(
-                "{}/media/{}{}-{}",
+                "{}/{}{}-{}",
                 self.output_path.clone().into(),
                 self.output_name.clone().into(),
                 start.clone().into(),
