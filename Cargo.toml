@@ -7,7 +7,9 @@ edition = "2021"
 [lib]
 name = "bridge"
 crate-type = ["cdylib"]
+path = "./rslib/bridge/lib.rs"
 
 [dependencies]
 pyo3 = "0.19.0"
-ffmpeg = { path = "./rslib" }
+ffmpeg = { path = "./rslib/ffmpeg" }
+file = { path = "./rslib/file" }

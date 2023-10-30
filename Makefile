@@ -5,12 +5,12 @@ lint:
 test:
 	cargo test --quiet
 dev:
-	maturin develop & python init.py
+	maturin develop & python src/init.py
 run:
 	cargo run 
 dev:
-	maturin develop & python init.py
-release:
-	cargo clean & cargo build --release & del /Q *.pyd & copy target\release\*.dll .\ & rename *.dll *.pyd & pyinstaller --noconfirm init.py
+	maturin develop & python src/init.py
+build:
+	cargo clean & cargo build --release & del /Q *.pyd & copy target\release\*.dll .\ & rename *.dll *.pyd & pyinstaller --noconfirm --nowindowed --noconsole src/init.py
 clean:
 	cargo clean
