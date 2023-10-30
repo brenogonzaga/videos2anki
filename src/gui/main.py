@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from bridge import ProcessVideo, ProcessAudio, ProcessCsv
 
 class Video2Anki(QtWidgets.QWidget):
@@ -31,8 +31,6 @@ class Video2Anki(QtWidgets.QWidget):
         layout.addWidget(self.run_button)
         layout.addWidget(self.progress_label)
 
-    
-
     def output_name(self):
         return self.output_name_edit.text()
 
@@ -41,18 +39,25 @@ class Video2Anki(QtWidgets.QWidget):
         if path:
             self.path_edit.setText(path)
 
-    def update_progress(self, done, missing):
-        self.progress_label.setText(f"Done: {done}, Missing: {missing}")
+    def update_progress(self, done, missing, type):
+        self.progress_label.setText(f"{type} - Done: {done}, Missing: {missing}")
+        QtCore.QCoreApplication.processEvents() 
+        
 
     def run_video_to_anki(self):
         video_path = self.path_edit.text()
         output_name = self.output_name_edit.text()
         output_path = self.output_path_edit.text()
+        if not output_path:
+            output_path = "output"
+        if not output_name:
+            output_name = "output"
         if video_path:
             srt_path = video_path.replace(".mkv", ".srt")
             process_audio = ProcessAudio(video_path, srt_path, output_path, output_name)
             process_video = ProcessVideo(video_path, srt_path, output_path, output_name)
             process_csv = ProcessCsv(srt_path, output_path, output_name)
-            process_csv.run()
-            process_audio.run(self.update_progress)
-            process_video.run(self.update_progress)
+            process_csv.start()
+            process_audio.start(self.update_progress)
+            process_video.start(self.update_progress)
+            self.progress_label.setText("Done!")
