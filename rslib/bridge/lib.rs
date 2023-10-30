@@ -1,6 +1,7 @@
 mod generate;
 
 use ffmpeg::cut::{Audio, Video};
+use file::csv::WriteCsv;
 use generate::times;
 use pyo3::{prelude::*, IntoPy};
 
@@ -114,7 +115,13 @@ impl ProcessCsv {
 
     fn start(&self) -> PyResult<()> {
         let (sentences, times) = times(self.input_srt.clone());
-        file::csv::write(&self.title, &times, &sentences, &self.output_path);
+        WriteCsv::new(
+            self.title.clone(),
+            times,
+            sentences,
+            self.output_path.clone(),
+        )
+        .write();
         Ok(())
     }
 }

@@ -1,30 +1,50 @@
 use std::fs::OpenOptions;
 use std::io::Write;
 
-pub fn write(
-    file_name: &String,
-    times: &[(String, String)],
-    sentences: &[String],
-    output_path: &String,
-) {
-    let _ = std::fs::create_dir_all(format!("{}/csv", output_path));
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .create(true)
-        .open(format!("{}/csv/{}.csv", output_path, file_name))
-        .unwrap();
+pub struct WriteCsv<T: Into<String> + Clone> {
+    file_name: T,
+    times: Vec<(T, T)>,
+    sentences: Vec<T>,
+    output_path: T,
+}
 
-    for (i, (start_time, end_time)) in times.iter().enumerate() {
-        let name = (file_name.clone() + start_time + "-" + end_time)
-            .replace(' ', "_")
-            .replace(':', ".");
-        let video = format!("[sound:{}.mp4]", name);
-        let audio = format!("[sound:{}.mp3]", name);
-        let line = format!("{}\t{}\t{}\t", file_name, video, audio);
-        file.write_all(line.as_bytes()).unwrap();
+impl<T: Into<String> + Clone> WriteCsv<T> {
+    pub fn new(file_name: T, times: Vec<(T, T)>, sentences: Vec<T>, output_path: T) -> Self {
+        WriteCsv {
+            file_name,
+            times,
+            sentences,
+            output_path,
+        }
+    }
 
-        let line = format!("\t{}\n", sentences[i + 1]);
-        file.write_all(line.as_bytes()).unwrap();
+    pub fn write(&self) {
+        let _ = std::fs::create_dir_all(format!("{}/csv", self.output_path.clone().into()));
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .create(true)
+            .open(format!(
+                "{}/csv/{}.csv",
+                self.output_path.clone().into(),
+                self.file_name.clone().into()
+            ))
+            .unwrap();
+
+        for (i, (start_time, end_time)) in self.times.iter().enumerate() {
+            let name = (self.file_name.clone().into()
+                + &start_time.clone().into()
+                + "-"
+                + &end_time.clone().into())
+                .replace(' ', "_")
+                .replace(':', ".");
+            let video = format!("[sound:{}.mp4]", name);
+            let audio = format!("[sound:{}.mp3]", name);
+            let line = format!("{}\t{}\t{}\t", self.file_name.clone().into(), video, audio);
+            file.write_all(line.as_bytes()).unwrap();
+
+            let line = format!("\t{}\n", self.sentences[i + 1].clone().into());
+            file.write_all(line.as_bytes()).unwrap();
+        }
     }
 }
