@@ -3,11 +3,13 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub fn run_ffmpeg_command(commands: String) -> Result<(), Error> {
+pub fn run_ffmpeg_command(commands: String, path: String) -> Result<(), Error> {
     #[cfg(target_os = "windows")]
     {
         use std::os::windows::process::CommandExt;
         let mut ffmpeg_process = Command::new("ffmpeg")
+            .arg("-i")
+            .arg(path)
             .args(commands.split(' '))
             .stdout(Stdio::null())
             .stderr(Stdio::null())
@@ -19,6 +21,8 @@ pub fn run_ffmpeg_command(commands: String) -> Result<(), Error> {
     #[cfg(not(target_os = "windows"))]
     {
         let mut ffmpeg_process = Command::new("ffmpeg")
+            .arg("-i")
+            .arg(path)
             .args(commands.split(' '))
             .stdout(Stdio::null())
             .stderr(Stdio::null())
