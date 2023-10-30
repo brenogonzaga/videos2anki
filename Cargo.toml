@@ -7,7 +7,7 @@ edition = "2021"
 [lib]
 name = "bridge"
 crate-type = ["cdylib"]
-path = "rsbridge/lib.rs"
+path = "./rslib/bridge/lib.rs"
 
 [dependencies]
 pyo3 = "0.19.0"
