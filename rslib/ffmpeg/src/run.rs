@@ -10,7 +10,7 @@ pub fn run_ffmpeg_command(commands: String, path: String) -> Result<(), Error> {
         let mut ffmpeg_process = Command::new("ffmpeg")
             .arg("-i")
             .arg(path)
-            .args(commands.split(' '))
+            .args(commands.split_whitespace())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .creation_flags(0x08000000) // CREATE_NO_WINDOW
