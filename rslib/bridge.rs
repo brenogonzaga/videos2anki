@@ -1,4 +1,4 @@
-use ffmpeg::cut::{Audio, Video};
+use ffmpeg::cut::{MediaCutter, Video};
 use file::{csv::WriteCsv, srt};
 use pyo3::{prelude::*, IntoPy};
 use std::{
@@ -8,14 +8,12 @@ use std::{
 
 #[pymodule]
 fn bridge(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<ProcessAudio>()?;
-    m.add_class::<ProcessVideo>()?;
-    m.add_class::<ProcessCsv>()?;
+    m.add_class::<GenerateMedia>()?;
     Ok(())
 }
 
 #[pyclass]
-struct ProcessAudio {
+struct GenerateMedia {
     input_video: String,
     input_srt: String,
     output_path: String,
@@ -23,10 +21,10 @@ struct ProcessAudio {
 }
 
 #[pymethods]
-impl ProcessAudio {
+impl GenerateMedia {
     #[new]
     fn new(input_video: String, input_srt: String, output_path: String, title: String) -> Self {
-        ProcessAudio {
+        GenerateMedia {
             input_video,
             input_srt,
             output_path,
@@ -34,7 +32,7 @@ impl ProcessAudio {
         }
     }
 
-    fn start(&self, progress: PyObject) -> PyResult<()> {
+    fn audio(&self, progress: PyObject) -> PyResult<()> {
         let (_, times) = times(self.input_srt.clone()).expect(
             "Error while parsing the srt file. Please make sure it is in the correct format.",
         );
@@ -46,38 +44,17 @@ impl ProcessAudio {
                 let _result = progress.call(py, (done_obj, missing_obj, type_obj), None);
             });
         });
-        Audio::new(
+        Video::new(
             times,
             self.input_video.clone(),
             self.output_path.clone(),
             self.title.clone(),
         )
-        .start(&callback)?;
+        .extract_audio(&callback)?;
         Ok(())
     }
-}
 
-#[pyclass]
-struct ProcessVideo {
-    input_video: String,
-    input_srt: String,
-    output_path: String,
-    title: String,
-}
-
-#[pymethods]
-impl ProcessVideo {
-    #[new]
-    fn new(input_video: String, input_srt: String, output_path: String, title: String) -> Self {
-        ProcessVideo {
-            input_video,
-            input_srt,
-            output_path,
-            title,
-        }
-    }
-
-    fn start(&self, progress: PyObject) -> PyResult<()> {
+    fn video(&self, progress: PyObject) -> PyResult<()> {
         let (_, times) = times(self.input_srt.clone()).expect(
             "Error while parsing the srt file. Please make sure it is in the correct format.",
         );
@@ -89,36 +66,18 @@ impl ProcessVideo {
                 let _result = progress.call(py, (done_obj, missing_obj, type_obj), None);
             });
         });
+
         Video::new(
             times,
             self.input_video.clone(),
             self.output_path.clone(),
             self.title.clone(),
         )
-        .start(&callback)?;
+        .extract_video(&callback)?;
         Ok(())
     }
-}
 
-#[pyclass]
-struct ProcessCsv {
-    input_srt: String,
-    output_path: String,
-    title: String,
-}
-
-#[pymethods]
-impl ProcessCsv {
-    #[new]
-    fn new(input_srt: String, output_path: String, title: String) -> Self {
-        ProcessCsv {
-            input_srt,
-            output_path,
-            title,
-        }
-    }
-
-    fn start(&self) -> PyResult<()> {
+    fn csv(&self) -> PyResult<()> {
         let (sentences, times) = times(self.input_srt.clone()).expect(
             "Error while parsing the srt file. Please make sure it is in the correct format.",
         );

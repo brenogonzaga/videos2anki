@@ -1,5 +1,5 @@
 from PySide6 import QtCore, QtWidgets
-from bridge import ProcessVideo, ProcessAudio, ProcessCsv
+from bridge import GenerateMedia
 
 class Video2Anki(QtWidgets.QWidget):
     def __init__(self):
@@ -69,10 +69,8 @@ class Video2Anki(QtWidgets.QWidget):
         if not output_name:
             output_name = "output"
         if video_path:
-            process_audio = ProcessAudio(video_path, srt_path, output_path, output_name)
-            process_video = ProcessVideo(video_path, srt_path, output_path, output_name)
-            process_csv = ProcessCsv(srt_path, output_path, output_name)
-            process_csv.start()
-            process_audio.start(self.update_progress)
-            process_video.start(self.update_progress)
+            generate = GenerateMedia(video_path, srt_path, output_path, output_name)
+            generate.csv()
+            generate.audio(self.update_progress)
+            generate.video(self.update_progress)
             self.progress_label.setText("Done!")

@@ -19,7 +19,7 @@ impl<T: Into<String> + Clone> WriteCsv<T> {
     }
 
     pub fn write(&self) {
-        let _ = std::fs::create_dir_all(format!("{}/csv", self.output_path.clone().into()));
+        let _ = std::fs::create_dir_all(format!("{}/", self.output_path.clone().into()));
         let mut file = OpenOptions::new()
             .write(true)
             .append(true)
