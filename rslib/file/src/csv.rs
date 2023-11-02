@@ -3,17 +3,17 @@ use std::io::Write;
 
 pub struct WriteCsv<T: Into<String> + Clone> {
     file_name: T,
-    times: Vec<(T, T)>,
     sentences: Vec<T>,
+    times: Vec<(T, T)>,
     output_path: T,
 }
 
 impl<T: Into<String> + Clone> WriteCsv<T> {
-    pub fn new(file_name: T, times: Vec<(T, T)>, sentences: Vec<T>, output_path: T) -> Self {
+    pub fn new(file_name: T, sentences: Vec<T>, times: Vec<(T, T)>, output_path: T) -> Self {
         WriteCsv {
             file_name,
-            times,
             sentences,
+            times,
             output_path,
         }
     }
