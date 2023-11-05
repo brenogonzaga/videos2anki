@@ -9,4 +9,4 @@ name = "ffmpeg"
 
 [dependencies]
 regex = "1.10.0"
-which = "2.0"
+which = "5.0.0"

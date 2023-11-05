@@ -1,0 +1,22 @@
+name: Rust BUILD
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest']
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - run: pip install -r requirements.txt
+      - run: pyinstaller src/init.py --onefile --name init
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*

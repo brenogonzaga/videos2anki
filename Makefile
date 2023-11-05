@@ -4,13 +4,13 @@ lint:
 	cargo clippy --quiet
 test:
 	cargo test --quiet
-dev:
-	maturin develop & python src/init.py
 run:
 	cargo run 
-dev:
-	maturin develop & python src/init.py
-build:
-	cargo clean & cargo build --release & del /Q *.pyd & copy target\release\*.dll .\ & rename *.dll *.pyd & pyinstaller --noconfirm --nowindowed --noconsole src/init.py
+del:
+	del /Q src\*.pyd src\*.dll
+dev: del
+	cargo build & copy target\release\*.dll src & rename src\*.dll *.pyd & python src/init.py
+build: del
+	cargo clean & cargo build --release & copy target\release\*.dll src & rename src\*.dll *.pyd & pyinstaller --noconfirm --nowindowed --noconsole src/init.py
 clean:
 	cargo clean

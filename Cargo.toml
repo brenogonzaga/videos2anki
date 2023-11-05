@@ -13,4 +13,3 @@ path = "./rslib/bridge.rs"
 pyo3 = "0.20.0"
 ffmpeg = { path = "./rslib/ffmpeg" }
 file = { path = "./rslib/file" }
-cargo-watch = "8.4.1"
