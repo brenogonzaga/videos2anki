@@ -1,6 +1,7 @@
 from PySide6 import QtCore, QtWidgets
 from bridge import GenerateMedia
 
+
 class Video2Anki(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -24,7 +25,6 @@ class Video2Anki(QtWidgets.QWidget):
         home_layout.addRow(self.path_srt_label, self.path_srt_edit)
         home_layout.addRow(self.browse_srt_btn)
 
-
         self.output_name_label = QtWidgets.QLabel("Deck name:")
         self.output_name_edit = QtWidgets.QLineEdit("output")
         home_layout.addRow(self.output_name_label, self.output_name_edit)
@@ -40,23 +40,25 @@ class Video2Anki(QtWidgets.QWidget):
         self.browse_srt_btn.clicked.connect(self.browse_srt)
         self.run_button.clicked.connect(self.run_video_to_anki)
 
-
         layout.addWidget(self.run_button)
         layout.addWidget(self.progress_label)
 
     def browse_video(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Choose Video File", "", "Video Files (*.mp4 *.avi *.mkv)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Choose Video File", "", "Video Files (*.mp4 *.avi *.mkv)")
         if path:
             self.path_video_edit.setText(path)
+
     def browse_srt(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Choose SRT File", "", "SRT Files (*.srt)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Choose SRT File", "", "SRT Files (*.srt)")
         if path:
             self.path_srt_edit.setText(path)
 
     def update_progress(self, done, missing, type):
-        self.progress_label.setText(f"{type} - Done: {done}, Missing: {missing}")
-        QtCore.QCoreApplication.processEvents() 
-        
+        self.progress_label.setText(
+            f"{type} - Done: {done}, Missing: {missing}")
+        QtCore.QCoreApplication.processEvents()
 
     def run_video_to_anki(self):
         video_path = self.path_video_edit.text()
@@ -69,7 +71,8 @@ class Video2Anki(QtWidgets.QWidget):
         if not output_name:
             output_name = "output"
         if video_path:
-            generate = GenerateMedia(video_path, srt_path, output_path, output_name)
+            generate = GenerateMedia(
+                video_path, srt_path, output_path, output_name)
             generate.csv()
             generate.audio(self.update_progress)
             generate.video(self.update_progress)

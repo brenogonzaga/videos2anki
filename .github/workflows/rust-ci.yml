@@ -1,0 +1,23 @@
+name: Rust CI
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Rust
+        uses: actions/checkout@v4
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Build
+        run: cargo build --verbose --all
+      - name: Test
+        run: cargo test --verbose --all
+      - name: Clippy
+        run: cargo clippy --verbose --all -- -D warnings
+      - name: Audit
+        run: cargo audit
