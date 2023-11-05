@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 path = "./rslib/bridge.rs"
 
 [dependencies]
-pyo3 = "0.19.0"
+pyo3 = "0.20.0"
 ffmpeg = { path = "./rslib/ffmpeg" }
 file = { path = "./rslib/file" }
 cargo-watch = "8.4.1"
