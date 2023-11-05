@@ -1,40 +1,44 @@
 use crate::run::run_ffmpeg_command;
 use std::io::{Error, ErrorKind};
 
-pub struct Video<T: Into<String> + Clone> {
+pub struct Video;
+
+pub struct Audio;
+
+pub struct Media<T: Into<String> + Clone, State> {
     times: Vec<(T, T)>,
     input_path: T,
     output_path: T,
     output_name: T,
+    state: std::marker::PhantomData<State>,
 }
 
-pub trait MediaCutter<T: Into<String> + Clone> {
-    fn new(times: Vec<(T, T)>, input_path: T, output_path: T, output_name: T) -> Self;
-    fn extract_audio(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error>;
-    fn extract_video(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error>;
-}
-
-impl<T: Into<String> + Clone> MediaCutter<T> for Video<T> {
-    fn new(times: Vec<(T, T)>, input_path: T, output_path: T, output_name: T) -> Self {
-        Video {
+impl<T: Into<String> + Clone, State> Media<T, State> {
+    pub fn new(times: Vec<(T, T)>, input_path: T, output_path: T, output_name: T) -> Self {
+        Media {
             times,
             input_path,
             output_path,
             output_name,
+            state: std::marker::PhantomData,
         }
-    }
-
-    fn extract_audio(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
-        extract_media(&self, "mp3", progress)
-    }
-
-    fn extract_video(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
-        extract_media(&self, "mp4", progress)
     }
 }
 
-fn extract_media<T: Into<String> + Clone>(
-    media: &Video<T>,
+impl<T: Into<String> + Clone> Media<T, Video> {
+    pub fn extract_video(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+        extract_media(self, "mp4", progress)
+    }
+}
+
+impl<T: Into<String> + Clone> Media<T, Audio> {
+    pub fn extract_audio(&self, progress: &dyn Fn(u64, u64)) -> Result<(), Error> {
+        extract_media(self, "mp3", progress)
+    }
+}
+
+fn extract_media<T: Into<String> + Clone, State>(
+    media: &Media<T, State>,
     format: &str,
     progress: &dyn Fn(u64, u64),
 ) -> Result<(), Error> {

@@ -1,4 +1,4 @@
-use ffmpeg::cut::{MediaCutter, Video};
+use ffmpeg::cut::Media;
 use file::{csv::WriteCsv, srt};
 use pyo3::{prelude::*, IntoPy};
 use std::{
@@ -44,7 +44,8 @@ impl GenerateMedia {
                 let _result = progress.call(py, (done_obj, missing_obj, type_obj), None);
             });
         });
-        Video::new(
+
+        Media::new(
             times,
             self.input_video.clone(),
             self.output_path.clone(),
@@ -67,7 +68,7 @@ impl GenerateMedia {
             });
         });
 
-        Video::new(
+        Media::new(
             times,
             self.input_video.clone(),
             self.output_path.clone(),
